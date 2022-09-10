@@ -25,3 +25,6 @@
 [submodule "source/uprintf"]
 	path = source/uprintf
 	url = git@github.com:bdmihai/stm32-uprintf
+[submodule "source/st7735"]
+	path = source/st7735
+	url = git@github.com:bdmihai/stm32-st7735
