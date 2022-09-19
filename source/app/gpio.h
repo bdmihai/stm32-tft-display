@@ -38,3 +38,9 @@ void gpio_toggle_blue_led();
 void gpio_handle_rotation();
 void gpio_handle_key();
 
+void gpio_tft_cs_high();
+void gpio_tft_cs_low();
+void gpio_tft_dc_high();
+void gpio_tft_dc_low();
+void gpio_tft_reset_high();
+void gpio_tft_reset_low();
