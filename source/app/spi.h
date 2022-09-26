@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________
  │                                                                            |
- │ COPYRIGHT (C) 2021 Mihai Baneu                                             |
+ │ COPYRIGHT (C) 2022 Mihai Baneu                                             |
  │                                                                            |
  | Permission is hereby  granted,  free of charge,  to any person obtaining a |
  | copy of this software and associated documentation files (the "Software"), |
@@ -21,24 +21,14 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 14.Nov.2021  |
+ |  Author: Mihai Baneu                           Last modified: 20.Sep.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
  
 #pragma once
 
-/* initialization */
-void gpio_init();
+void spi_init();
 
-/* led control */
-void gpio_set_blue_led();
-void gpio_reset_blue_led();
-void gpio_toggle_blue_led();
-
-void gpio_handle_rotation();
-void gpio_handle_key();
-
-void gpio_tft_dc_high();
-void gpio_tft_dc_low();
-void gpio_tft_res_high();
-void gpio_tft_res_low();
+/* basic read/write */
+uint16_t spi_write(const uint8_t *buffer, uint16_t size);
+uint16_t spi_read(uint8_t *buffer, uint16_t size);

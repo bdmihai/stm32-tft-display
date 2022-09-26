@@ -34,6 +34,7 @@
 #include "gpio.h"
 #include "isr.h"
 #include "i2c.h"
+#include "spi.h"
 #include "dma.h"
 #include "printf.h"
 #include "led.h"
@@ -126,6 +127,9 @@ int main(void)
 
     /* initialize the i2c interface */
     i2c_init();
+
+    /* initialize the spi interface */
+    spi_init();
 
     /* initialize the dma controller */
     dma_init();

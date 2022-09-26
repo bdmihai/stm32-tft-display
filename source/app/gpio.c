@@ -74,21 +74,35 @@ void gpio_init()
     MODIFY_REG(SYSCFG->EXTICR[2], SYSCFG_EXTICR3_EXTI10, SYSCFG_EXTICR3_EXTI10_PB);   /* map gpio to EXTI lines */
 
     /* configure tft control pins */
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER2_Msk, GPIO_MODER_MODER2_0);   /* set the pin as output */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER6_Msk, GPIO_MODER_MODER6_0);   /* set the pin as output */
     MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER3_Msk, GPIO_MODER_MODER3_0);   /* set the pin as output */
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER4_Msk, GPIO_MODER_MODER4_0);   /* set the pin as output */
 
-    MODIFY_REG(GPIOA->OTYPER, GPIO_OTYPER_OT2_Msk, 0);                      /* push pull */
+    MODIFY_REG(GPIOA->OTYPER, GPIO_OTYPER_OT6_Msk, 0);                      /* push pull */
     MODIFY_REG(GPIOA->OTYPER, GPIO_OTYPER_OT3_Msk, 0);                      /* push pull */
-    MODIFY_REG(GPIOA->OTYPER, GPIO_OTYPER_OT4_Msk, 0);                      /* push pull */
 
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED2_Msk, 0);                /* low speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED6_Msk, 0);                /* low speed */
     MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED3_Msk, 0);                /* low speed */
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, 0);                /* low speed */
 
-    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD2_Msk, 0);                      /* no pull up, no pull down */
+    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD6_Msk, 0);                      /* no pull up, no pull down */
     MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD3_Msk, 0);                      /* no pull up, no pull down */
-    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD4_Msk, 0);                      /* no pull up, no pull down */
+
+    gpio_tft_res_high();
+    gpio_tft_dc_low();
+
+    /* configure the SPI pins */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER4_Msk, GPIO_MODER_MODER4_1);        /* set the pin as alternate function */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER5_Msk, GPIO_MODER_MODER5_1);        /* set the pin as alternate function */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER7_Msk, GPIO_MODER_MODER7_1);        /* set the pin as alternate function */
+
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, /* GPIO_OSPEEDR_OSPEED4_0 | GPIO_OSPEEDR_OSPEED4_1 */ 0);                     /* low speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED5_Msk, /* GPIO_OSPEEDR_OSPEED5_0 | GPIO_OSPEEDR_OSPEED5_1 */ 0);                     /* low speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, /* GPIO_OSPEEDR_OSPEED7_0 | GPIO_OSPEEDR_OSPEED7_1 */ 0);                     /* low speed */
+
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL4_Msk, 5 << GPIO_AFRL_AFSEL4_Pos);  /* AF05 - SPI1_NSS */
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL5_Msk, 5 << GPIO_AFRL_AFSEL5_Pos);  /* AF05 - SPI1_SCK */
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, 5 << GPIO_AFRL_AFSEL7_Pos);  /* AF05 - SPI1_MOSI */
+
+    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD4_Msk, 1 << GPIO_PUPDR_PUPD4_Pos);   /* pull up */
 }
 
 void gpio_set_blue_led()
@@ -122,32 +136,22 @@ void gpio_handle_key()
   xQueueSendToBackFromISR(rencoder_input_queue, &event, (TickType_t) 0);
 }
 
-void gpio_tft_cs_high()
-{
-  GPIOA->BSRR = GPIO_BSRR_BS2;
-}
-
-void gpio_tft_cs_low()
-{
-  GPIOA->BSRR = GPIO_BSRR_BR2;
-}
-
 void gpio_tft_dc_high()
 {
-  GPIOA->BSRR = GPIO_BSRR_BS3;
+  GPIOA->BSRR = GPIO_BSRR_BS6;
 }
 
 void gpio_tft_dc_low()
 {
+  GPIOA->BSRR = GPIO_BSRR_BR6;
+}
+
+void gpio_tft_res_high()
+{
+  GPIOA->BSRR = GPIO_BSRR_BS3;
+}
+
+void gpio_tft_res_low()
+{
   GPIOA->BSRR = GPIO_BSRR_BR3;
-}
-
-void gpio_tft_reset_high()
-{
-  GPIOA->BSRR = GPIO_BSRR_BS4;
-}
-
-void gpio_tft_reset_low()
-{
-  GPIOA->BSRR = GPIO_BSRR_BR4;
 }
