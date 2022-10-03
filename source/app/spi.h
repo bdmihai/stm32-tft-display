@@ -30,5 +30,5 @@
 void spi_init();
 
 /* basic read/write */
-uint16_t spi_write(const uint8_t *buffer, uint16_t size);
+uint16_t spi_write(const uint8_t *buffer, uint16_t size, uint16_t repeat);
 uint16_t spi_read(uint8_t *buffer, uint16_t size);

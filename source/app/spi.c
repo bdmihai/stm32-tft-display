@@ -41,7 +41,7 @@ void spi_init()
   MODIFY_REG(SPI1->CR2, SPI_CR2_SSOE_Msk, SPI_CR2_SSOE);            /* single master */
 }
 
-uint16_t spi_write(const uint8_t *buffer, uint16_t size)
+uint16_t spi_write(const uint8_t *buffer, uint16_t size, uint16_t repeat)
 {
   /* set the SPI in transmit only mode */
   MODIFY_REG(SPI1->CR1, SPI_CR1_BIDIOE_Msk, SPI_CR1_BIDIOE);
@@ -49,12 +49,13 @@ uint16_t spi_write(const uint8_t *buffer, uint16_t size)
   /* activate the SPI */
   MODIFY_REG(SPI1->CR1, SPI_CR1_SPE_Msk, SPI_CR1_SPE);
 
-  
-  for (uint16_t i = 0; i < size; i++) {
-    /* wait for TX ready and load the data */
-    do {
-    } while ((SPI1->SR & SPI_SR_TXE_Msk) != SPI_SR_TXE);
-    SPI1->DR = buffer[i];
+  for (uint16_t j = 0; j < repeat; j++) {
+    for (uint16_t i = 0; i < size; i++) {
+      /* wait for TX ready and load the data */
+      do {
+      } while ((SPI1->SR & SPI_SR_TXE_Msk) != SPI_SR_TXE);
+      SPI1->DR = buffer[i];
+    }
   }
 
   /* wait for TX ready, wait for busy flag to be reseted and then disable the SPI */
