@@ -21,7 +21,7 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 20.Sep.2022  |
+ |  Author: Mihai Baneu                           Last modified: 05.Oct.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
 
@@ -33,7 +33,7 @@ void spi_init()
   MODIFY_REG(SPI1->CR1, SPI_CR1_CPHA_Msk, 0);                       /* CPOL = 0, CPHA = 0 */
   MODIFY_REG(SPI1->CR1, SPI_CR1_CPOL_Msk, 0);
   MODIFY_REG(SPI1->CR1, SPI_CR1_MSTR_Msk, SPI_CR1_MSTR);            /* MASTER */
-  MODIFY_REG(SPI1->CR1, SPI_CR1_BR_Msk, 0x02 << SPI_CR1_BR_Pos);    /* 48Mhz / 8 = 6Mhz (166.7ns) */
+  MODIFY_REG(SPI1->CR1, SPI_CR1_BR_Msk, 0x00 << SPI_CR1_BR_Pos);    /* 48Mhz / 2 = 24Mhz (41.67ns) */
   MODIFY_REG(SPI1->CR1, SPI_CR1_LSBFIRST_Msk, 0);                   /* MSB First */
   MODIFY_REG(SPI1->CR1, SPI_CR1_BIDIMODE_Msk, SPI_CR1_BIDIMODE);    /* BI Directional - MOSI */
   MODIFY_REG(SPI1->CR1, SPI_CR1_BIDIOE_Msk, SPI_CR1_BIDIOE);        /* BI Directional - transmit only */

@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________
  │                                                                            |
- │ COPYRIGHT (C) 2021 Mihai Baneu                                             |
+ │ COPYRIGHT (C) 2022 Mihai Baneu                                             |
  │                                                                            |
  | Permission is hereby  granted,  free of charge,  to any person obtaining a |
  | copy of this software and associated documentation files (the "Software"), |
@@ -21,10 +21,10 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 14.Nov.2021  |
+ |  Author: Mihai Baneu                           Last modified: 05.Oct.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
-
+ 
 #include "stm32f4xx.h"
 #include "stm32rtos.h"
 #include "queue.h"
@@ -94,9 +94,9 @@ void gpio_init()
     MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER5_Msk, GPIO_MODER_MODER5_1);        /* set the pin as alternate function */
     MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER7_Msk, GPIO_MODER_MODER7_1);        /* set the pin as alternate function */
 
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, /* GPIO_OSPEEDR_OSPEED4_0 | GPIO_OSPEEDR_OSPEED4_1 */ 0);                     /* low speed */
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED5_Msk, /* GPIO_OSPEEDR_OSPEED5_0 | GPIO_OSPEEDR_OSPEED5_1 */ 0);                     /* low speed */
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, /* GPIO_OSPEEDR_OSPEED7_0 | GPIO_OSPEEDR_OSPEED7_1 */ 0);                     /* low speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, GPIO_OSPEEDR_OSPEED4_0 | GPIO_OSPEEDR_OSPEED4_1 );                     /* high speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED5_Msk, GPIO_OSPEEDR_OSPEED5_0 | GPIO_OSPEEDR_OSPEED5_1 );                     /* high speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0 | GPIO_OSPEEDR_OSPEED7_1 );                     /* high speed */
 
     MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL4_Msk, 5 << GPIO_AFRL_AFSEL4_Pos);  /* AF05 - SPI1_NSS */
     MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL5_Msk, 5 << GPIO_AFRL_AFSEL5_Pos);  /* AF05 - SPI1_SCK */

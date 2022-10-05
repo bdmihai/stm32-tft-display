@@ -1,6 +1,6 @@
 /*_____________________________________________________________________________
  │                                                                            |
- │ COPYRIGHT (C) 2021 Mihai Baneu                                             |
+ │ COPYRIGHT (C) 2022 Mihai Baneu                                             |
  │                                                                            |
  | Permission is hereby  granted,  free of charge,  to any person obtaining a |
  | copy of this software and associated documentation files (the "Software"), |
@@ -21,7 +21,7 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 19.May.2022  |
+ |  Author: Mihai Baneu                           Last modified: 05.Oct.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
 
@@ -45,11 +45,11 @@
 #define EEPROM_PAGE_SIZE    16
 #define EEPROM_I2C_ADDRESS  0b01010000
 
-static void query_eeprom(uint16_t counter)
+static void query_eeprom(uint16_t counter, tft_event_type_t tft_event_type)
 {
     dma_request_event_t dma_request_event;
     dma_response_event_t dma_response_event;
-    tft_event_t tft_event = { {0}, {0} };
+    tft_event_t tft_event = { 0 };
 
     // set the location for the read
     dma_request_event.length = 1;
@@ -59,8 +59,7 @@ static void query_eeprom(uint16_t counter)
     xQueueSendToBack(dma_request_queue, &dma_request_event, (TickType_t) 1);
     if (xQueueReceive(dma_response_queue, &dma_response_event, portMAX_DELAY) == pdPASS) {
         if (dma_response_event.status != dma_request_status_success) {
-            sprintf(tft_event.row1_txt, "%s [%d]", "Write error", dma_response_event.length);
-            sprintf(tft_event.row2_txt, "   ---   ");
+            sprintf(tft_event.row_txt, "%s [%d]", "Write error", dma_response_event.length);
         }
         else {
             dma_request_event.length = 16;
@@ -69,30 +68,17 @@ static void query_eeprom(uint16_t counter)
             xQueueSendToBack(dma_request_queue, &dma_request_event, (TickType_t) 1);
             if (xQueueReceive(dma_response_queue, &dma_response_event, portMAX_DELAY) == pdPASS) {
                 if (dma_response_event.status != dma_request_status_success) {
-                    sprintf(tft_event.row1_txt, "%s [%d]", "Read error", dma_response_event.length);
+                    sprintf(tft_event.row_txt, "%s [%d]", "Read error", dma_response_event.length);
                 }
                 else {
-                    memset(tft_event.row1_txt, 0, sizeof(tft_event.row1_txt));
-                    memcpy(tft_event.row1_txt, dma_response_event.buffer, dma_response_event.length);
-                }
-            }
-
-            dma_request_event.length = 16;
-            dma_request_event.type = dma_request_type_i2c_read;
-            dma_request_event.address = EEPROM_I2C_ADDRESS;
-            xQueueSendToBack(dma_request_queue, &dma_request_event, (TickType_t) 1);
-            if (xQueueReceive(dma_response_queue, &dma_response_event, portMAX_DELAY) == pdPASS) {
-                if (dma_response_event.status != dma_request_status_success) {
-                    sprintf(tft_event.row2_txt, "%s [%d]", "Read error", dma_response_event.length);
-                }
-                else {
-                    memset(tft_event.row2_txt, 0, sizeof(tft_event.row2_txt));
-                    memcpy(tft_event.row2_txt, dma_response_event.buffer, dma_response_event.length);
+                    memset(tft_event.row_txt, 0, sizeof(tft_event.row_txt));
+                    memcpy(tft_event.row_txt, dma_response_event.buffer, dma_response_event.length);
                 }
             }
         }
     }
 
+    tft_event.type = tft_event_type;
     xQueueSendToBack(tft_queue, &tft_event, (TickType_t) 1);
 }
 
@@ -100,15 +86,33 @@ static void user_handler(void *pvParameters)
 {
     (void)pvParameters;
 
-    query_eeprom(0);
+    query_eeprom(0 * 16, tft_event_text_up);
+    query_eeprom(1 * 16, tft_event_text_up);
+    query_eeprom(2 * 16, tft_event_text_up);
+    query_eeprom(3 * 16, tft_event_text_up);
+    query_eeprom(4 * 16, tft_event_text_up);
+    query_eeprom(5 * 16, tft_event_text_up);
+
     for (;;) {
         rencoder_output_event_t event;
         if (xQueueReceive(rencoder_output_queue, &event, portMAX_DELAY) == pdPASS) {
-            if (event.type == rencoder_output_rotation) {
-                query_eeprom(event.position * 16);
-            } else if ((event.type == rencoder_output_key) && (event.key == RENCODER_KEY_RELEASED)) {
-                rencoder_reset();
-                query_eeprom(0);
+            if (event.type == rencoder_output_rotation && event.direction == RENCODER_DIR_CW) {
+                query_eeprom(event.position * 16, tft_event_text_up);
+            }
+            else if (event.type == rencoder_output_rotation && event.direction == RENCODER_DIR_CCW) {
+                query_eeprom((event.position - 5) * 16, tft_event_text_down);
+            } 
+            else if ((event.type == rencoder_output_key) && (event.key == RENCODER_KEY_RELEASED)) {
+                //rencoder_reset();
+                //query_eeprom(0 * 16, tft_event_text_up);
+                //query_eeprom(1 * 16, tft_event_text_up);
+                //query_eeprom(2 * 16, tft_event_text_up);
+                //query_eeprom(3 * 16, tft_event_text_up);
+                //query_eeprom(4 * 16, tft_event_text_up);
+                //query_eeprom(5 * 16, tft_event_text_up);
+                tft_event_t tft_event = { 0 };
+                tft_event.type = tft_event_background;
+                xQueueSendToBack(tft_queue, &tft_event, (TickType_t) 1);
             }
         }
     }
@@ -141,7 +145,7 @@ int main(void)
     tft_init();
 
     /* initialize the encoder */
-    rencoder_init(0, (EEPROM_SIZE - 32) / 16);
+    rencoder_init(5, (EEPROM_SIZE - 16) / 16);
 
     /* create the tasks specific to this application. */
     xTaskCreate(led_run,      "led",          configMINIMAL_STACK_SIZE,     NULL, 3, NULL);

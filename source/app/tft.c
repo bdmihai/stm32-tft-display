@@ -21,7 +21,7 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 26.Sep.2022  |
+ |  Author: Mihai Baneu                           Last modified: 05.Oct.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
 
@@ -60,7 +60,110 @@ QueueHandle_t tft_queue = NULL;
 
 void tft_init()
 {
-    tft_queue = xQueueCreate(2, sizeof(tft_event_t));
+    tft_queue = xQueueCreate(6, sizeof(tft_event_t));
+}
+
+void tft_run(void *params)
+{
+    (void)params;
+    char display_txt[6][17] = { 0 };
+    st7735_color_16_bit_t bk_colors[] = {
+        rgb_yellow,
+        rgb_lime,
+        rgb_teal
+    };
+    uint8_t bk_color_index = 0;
+
+    st7735_hw_control_t hw = {
+        .res_high = gpio_tft_res_high,
+        .res_low  = gpio_tft_res_low,
+        .dc_high  = gpio_tft_dc_high,
+        .dc_low   = gpio_tft_dc_low,
+        .data_wr  = spi_write,
+        .data_rd  = spi_read,
+        .delay_us = delay_us
+    };
+
+    st7735_init(hw);
+
+    /* perform a HW reset */
+    st7735_hardware_reset();
+    st7735_sleep_out_and_booster_on();
+    delay_us(10000);
+    st7735_normal_mode();
+
+    /* configure the display */
+    st7735_display_inversion_off();
+    st7735_interface_pixel_format(ST7735_16_PIXEL);
+    st7735_display_on();
+    st7735_memory_data_access_control(0, 1, 0, 0, 0, 0);
+    st7735_column_address_set(0, 128-1);
+    st7735_row_address_set(0, 160-1);
+
+    /* prepare the background */
+    st7735_draw_fill(0, 0, 160-1, 128-1, rgb_white);
+    st7735_draw_rectangle(10, 10, 150, 120, rgb_red, bk_colors[bk_color_index]);
+
+    /* process events */
+    for (;;) {
+        tft_event_t tft_event;
+        if (xQueueReceive(tft_queue, &tft_event, portMAX_DELAY) == pdPASS) {
+            switch (tft_event.type) {
+                case tft_event_text_up:
+                    memcpy(display_txt[0], display_txt[1], 17);
+                    memcpy(display_txt[1], display_txt[2], 17);
+                    memcpy(display_txt[2], display_txt[3], 17);
+                    memcpy(display_txt[3], display_txt[4], 17);
+                    memcpy(display_txt[4], display_txt[5], 17);
+                    memcpy(display_txt[5], tft_event.row_txt, 17);
+                    
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 2*8, rgb_black, bk_colors[bk_color_index], display_txt[0]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 4*8, rgb_black, bk_colors[bk_color_index], display_txt[1]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 6*8, rgb_black, bk_colors[bk_color_index], display_txt[2]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 8*8, rgb_black, bk_colors[bk_color_index], display_txt[3]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,10*8, rgb_black, bk_colors[bk_color_index], display_txt[4]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,12*8, rgb_black, bk_colors[bk_color_index], display_txt[5]);
+                    break;
+
+                case tft_event_text_down:
+                    memcpy(display_txt[5], display_txt[4], 17);
+                    memcpy(display_txt[4], display_txt[3], 17);
+                    memcpy(display_txt[3], display_txt[2], 17);
+                    memcpy(display_txt[2], display_txt[1], 17);
+                    memcpy(display_txt[1], display_txt[0], 17);
+                    memcpy(display_txt[0], tft_event.row_txt, 17);
+                    
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 2*8, rgb_black, bk_colors[bk_color_index], display_txt[0]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 4*8, rgb_black, bk_colors[bk_color_index], display_txt[1]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 6*8, rgb_black, bk_colors[bk_color_index], display_txt[2]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 8*8, rgb_black, bk_colors[bk_color_index], display_txt[3]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,10*8, rgb_black, bk_colors[bk_color_index], display_txt[4]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,12*8, rgb_black, bk_colors[bk_color_index], display_txt[5]);
+                    break;
+                
+                case tft_event_background:
+                    bk_color_index++;
+                    if (bk_color_index >= sizeof(bk_colors)/sizeof(st7735_color_16_bit_t)) {
+                        bk_color_index = 0;
+                    }
+
+                    /* prepare the background */
+                    st7735_draw_fill(0, 0, 160-1, 128-1, rgb_white);
+                    st7735_draw_rectangle(10, 10, 150, 120, rgb_red, bk_colors[bk_color_index]);
+
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 2*8, rgb_black, bk_colors[bk_color_index], display_txt[0]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 4*8, rgb_black, bk_colors[bk_color_index], display_txt[1]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 6*8, rgb_black, bk_colors[bk_color_index], display_txt[2]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 8*8, rgb_black, bk_colors[bk_color_index], display_txt[3]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,10*8, rgb_black, bk_colors[bk_color_index], display_txt[4]);
+                    st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8,12*8, rgb_black, bk_colors[bk_color_index], display_txt[5]);
+                    break;
+                
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 static void test_draw_fill()
@@ -208,7 +311,7 @@ static void test_draw_animation()
     }
 }
 
-void tft_run(void *params)
+void tft_run_test(void *params)
 {
     (void)params;
 

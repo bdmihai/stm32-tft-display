@@ -21,16 +21,26 @@
  | THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                 |
  |____________________________________________________________________________|
  |                                                                            |
- |  Author: Mihai Baneu                           Last modified: 10.Sep.2022  |
+ |  Author: Mihai Baneu                           Last modified: 05.Oct.2022  |
  |                                                                            |
  |___________________________________________________________________________*/
 
 #pragma once
 
+typedef enum tft_event_type_t {
+    tft_event_text_up    = 0,
+    tft_event_text_down  = 1,
+    tft_event_background = 2
+} tft_event_type_t;
+
 /* tft update event */
 typedef struct tft_event_t {
-    char row1_txt[17];
-    char row2_txt[17];
+    union {
+        struct {
+            char row_txt[17];
+        };
+    };
+    tft_event_type_t type;
 } tft_event_t;
 
 /* Queue used to communicate TFT update messages. */
