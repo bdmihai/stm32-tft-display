@@ -19,7 +19,8 @@
         "type_traits": "c",
         "stm32rtos.h": "c",
         "lcd.h": "c",
-        "tft.h": "c"
+        "tft.h": "c",
+        "queue.h": "c"
     },
     "Open files list": false,
     "Toggle terminal": false,

@@ -90,19 +90,19 @@ void gpio_init()
     gpio_tft_dc_low();
 
     /* configure the SPI pins */
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER4_Msk, GPIO_MODER_MODER4_1);        /* set the pin as alternate function */
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER5_Msk, GPIO_MODER_MODER5_1);        /* set the pin as alternate function */
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER7_Msk, GPIO_MODER_MODER7_1);        /* set the pin as alternate function */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER4_Msk, GPIO_MODER_MODER4_1);                                     /* set the pin as alternate function */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER5_Msk, GPIO_MODER_MODER5_1);                                     /* set the pin as alternate function */
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODER7_Msk, GPIO_MODER_MODER7_1);                                     /* set the pin as alternate function */
 
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, GPIO_OSPEEDR_OSPEED4_0 | GPIO_OSPEEDR_OSPEED4_1 );                     /* high speed */
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED5_Msk, GPIO_OSPEEDR_OSPEED5_0 | GPIO_OSPEEDR_OSPEED5_1 );                     /* high speed */
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0 | GPIO_OSPEEDR_OSPEED7_1 );                     /* high speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED4_Msk, GPIO_OSPEEDR_OSPEED4_0 | GPIO_OSPEEDR_OSPEED4_1 );   /* high speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED5_Msk, GPIO_OSPEEDR_OSPEED5_0 | GPIO_OSPEEDR_OSPEED5_1 );   /* high speed */
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0 | GPIO_OSPEEDR_OSPEED7_1 );   /* high speed */
 
-    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL4_Msk, 5 << GPIO_AFRL_AFSEL4_Pos);  /* AF05 - SPI1_NSS */
-    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL5_Msk, 5 << GPIO_AFRL_AFSEL5_Pos);  /* AF05 - SPI1_SCK */
-    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, 5 << GPIO_AFRL_AFSEL7_Pos);  /* AF05 - SPI1_MOSI */
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL4_Msk, 5 << GPIO_AFRL_AFSEL4_Pos);                               /* AF05 - SPI1_NSS */
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL5_Msk, 5 << GPIO_AFRL_AFSEL5_Pos);                               /* AF05 - SPI1_SCK */
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, 5 << GPIO_AFRL_AFSEL7_Pos);                               /* AF05 - SPI1_MOSI */
 
-    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD4_Msk, 1 << GPIO_PUPDR_PUPD4_Pos);   /* pull up */
+    MODIFY_REG(GPIOA->PUPDR, GPIO_PUPDR_PUPD4_Msk, 1 << GPIO_PUPDR_PUPD4_Pos);                                /* pull up */
 }
 
 void gpio_set_blue_led()
