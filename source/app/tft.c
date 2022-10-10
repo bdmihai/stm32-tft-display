@@ -172,26 +172,37 @@ static void test_draw_display_id()
 {
     char txt[16] = { 0 };
     uint32_t id;
+    uint8_t id1, id2, id3;
 
     st7735_draw_fill(0, 0, 160-1, 128-1, st7735_rgb_white);
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    id = st7735_read_display_id();
+    st7735_read_display_id(&id);
     sprintf(txt, "ID:  0x%08X", id);
     st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 2*8, st7735_rgb_black, st7735_rgb_white, txt);
 
-    id = st7735_read_id1();
-    sprintf(txt, "ID1: 0x%02X", id);
+    st7735_read_id1(&id1);
+    sprintf(txt, "ID1: 0x%02X", id1);
     st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 5*8, st7735_rgb_black, st7735_rgb_white, txt);
 
-    id = st7735_read_id2();
-    sprintf(txt, "ID2: 0x%02X", id);
+    st7735_read_id2(&id2);
+    sprintf(txt, "ID2: 0x%02X", id2);
     st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 8*8, st7735_rgb_black, st7735_rgb_white, txt);
 
-    id = st7735_read_id3();
-    sprintf(txt, "ID3: 0x%02X", id);
+    st7735_read_id3(&id3);
+    sprintf(txt, "ID3: 0x%02X", id3);
     st7735_draw_string(u8x8_font_8x13B_1x2_f, 2*8, 11*8, st7735_rgb_black, st7735_rgb_white, txt);
 
+    st7735_display_inversion_on();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    st7735_display_inversion_off();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    st7735_display_inversion_on();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    st7735_display_inversion_off();
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
@@ -312,6 +323,35 @@ static void test_draw_image()
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
+static uint8_t read_buffer[128*3] = { 0 };
+static st7735_color_16_bit_t write_buffer[128];
+static void test_draw_read_write()
+{
+    st7735_draw_fill(0, 0, 160-1, 128-1, st7735_rgb_black);
+    st7735_draw_image(0, 0, logo.width, logo.height, (uint8_t *)logo.pixel_data);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    for (uint8_t i = 0; i < 160; i++) {
+        st7735_interface_pixel_format(ST7735_18_PIXEL);
+        st7735_row_address_set(i, i);
+        st7735_column_address_set(0, 128 - 1);
+        st7735_memory_read(read_buffer, sizeof(read_buffer));
+        st7735_interface_pixel_format(ST7735_16_PIXEL);
+
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+        for (uint8_t j = 0; j < 128; j++) {
+            st7735_color_16_bit_t color =  { ST7735_RGB_18bit((255 - read_buffer[j*3+1]), (255 - read_buffer[j*3+2]), (255 - read_buffer[j*3]))  };
+            write_buffer[j] = color;
+        }
+
+        st7735_row_address_set(i, i);
+        st7735_column_address_set(0, 128 - 1);
+        st7735_memory_write(write_buffer, sizeof(write_buffer), 1);
+    }
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+}
+
 static void test_draw_text()
 {
     st7735_draw_fill(0, 0, 160-1, 128-1, st7735_rgb_white);
@@ -389,7 +429,7 @@ void tft_run(void *params)
  
     uint8_t all = 0;
     for (;;) {
-        //goto draw_display_id;
+        //goto draw_read_write;
         all = 1;
 
 draw_display_id:
@@ -418,6 +458,10 @@ draw_circles:
    
 draw_image:
         test_draw_image();
+        if (!all) continue;
+
+draw_read_write:
+        test_draw_read_write();
         if (!all) continue;
 
 draw_text:
